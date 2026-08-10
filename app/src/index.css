@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-teal: #22c8ba;
+  --color-brand-teal-dark: #189085;
+  --color-brand-teal-light: #6ee0d5;
+
+  --color-bg: #14171a;
+  --color-surface: #1c2026;
+  --color-surface-hover: #242931;
+  --color-border: #2a2f37;
+
+  --color-text: #f5f7fa;
+  --color-text-muted: #9aa3ae;
+
+  --color-status-available: #22c8ba;
+  --color-status-sold: #6b7280;
+  --color-status-refunded: #f59e0b;
+  --color-status-checkedin: #a78bfa;
+
+  --color-danger: #ef4444;
+  --color-danger-dark: #7f1d1d;
+  --color-success: #22c8ba;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--color-brand-teal);
+  color: #05201d;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-4px);
+  }
+  40%,
+  60% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}

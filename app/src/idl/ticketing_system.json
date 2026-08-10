@@ -1,0 +1,1640 @@
+{
+  "address": "2vPTZ9iRydqA3mbkkK6CPXhFuTBdVc8s3otKmfcABiVK",
+  "metadata": {
+    "name": "ticketing_system",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "buy_seat",
+      "discriminator": [
+        225,
+        111,
+        238,
+        154,
+        123,
+        74,
+        43,
+        234
+      ],
+      "accounts": [
+        {
+          "name": "customer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "event"
+        },
+        {
+          "name": "organizer",
+          "docs": [
+            "validated against event.organizer."
+          ]
+        },
+        {
+          "name": "seat_tier"
+        },
+        {
+          "name": "seat",
+          "writable": true
+        },
+        {
+          "name": "ticket_mint",
+          "writable": true
+        },
+        {
+          "name": "payment_mint"
+        },
+        {
+          "name": "customer_ticket_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "customer"
+              },
+              {
+                "kind": "account",
+                "path": "ticket_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "ticket_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "customer_payment_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "customer"
+              },
+              {
+                "kind": "account",
+                "path": "payment_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "organizer_payment_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "organizer"
+              },
+              {
+                "kind": "account",
+                "path": "payment_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "ticket_token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "payment_token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "check_in",
+      "discriminator": [
+        209,
+        253,
+        4,
+        217,
+        250,
+        241,
+        207,
+        50
+      ],
+      "accounts": [
+        {
+          "name": "staff",
+          "signer": true
+        },
+        {
+          "name": "event"
+        },
+        {
+          "name": "seat_tier"
+        },
+        {
+          "name": "seat",
+          "writable": true
+        },
+        {
+          "name": "ticket_token_account"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_event",
+      "discriminator": [
+        49,
+        219,
+        29,
+        203,
+        22,
+        98,
+        100,
+        87
+      ],
+      "accounts": [
+        {
+          "name": "organizer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "event",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  101,
+                  118,
+                  101,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "organizer"
+              },
+              {
+                "kind": "arg",
+                "path": "event_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "event_id",
+          "type": "u64"
+        },
+        {
+          "name": "jurisdiction_registry",
+          "type": "pubkey"
+        },
+        {
+          "name": "refund_deadline",
+          "type": "i64"
+        },
+        {
+          "name": "refund_bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "create_jurisdiction_registry",
+      "discriminator": [
+        90,
+        121,
+        234,
+        58,
+        90,
+        76,
+        49,
+        45
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "jurisdiction_registry",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  106,
+                  117,
+                  114,
+                  105,
+                  115,
+                  100,
+                  105,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "jurisdiction_code"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "jurisdiction_code",
+          "type": "string"
+        },
+        {
+          "name": "legal_cap_bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "create_seat",
+      "discriminator": [
+        91,
+        13,
+        230,
+        183,
+        58,
+        95,
+        118,
+        199
+      ],
+      "accounts": [
+        {
+          "name": "organizer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "event"
+        },
+        {
+          "name": "seat_tier"
+        },
+        {
+          "name": "seat",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  97,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "event"
+              },
+              {
+                "kind": "account",
+                "path": "seat_tier"
+              },
+              {
+                "kind": "arg",
+                "path": "seat_code"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "seat_code",
+          "type": "string"
+        },
+        {
+          "name": "display_name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "create_seat_tier",
+      "discriminator": [
+        140,
+        119,
+        58,
+        250,
+        2,
+        214,
+        90,
+        223
+      ],
+      "accounts": [
+        {
+          "name": "organizer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "event"
+        },
+        {
+          "name": "jurisdiction_registry"
+        },
+        {
+          "name": "seat_tier",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  115,
+                  101,
+                  97,
+                  116,
+                  95,
+                  116,
+                  105,
+                  101,
+                  114
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "event"
+              },
+              {
+                "kind": "arg",
+                "path": "tier_name"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ticket_mint",
+          "docs": [
+            "extension, which the declarative `mint::` constraint does not support)."
+          ],
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  105,
+                  99,
+                  107,
+                  101,
+                  116,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "seat_tier"
+              }
+            ]
+          }
+        },
+        {
+          "name": "payment_mint"
+        },
+        {
+          "name": "bid_queue",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  105,
+                  100,
+                  95,
+                  113,
+                  117,
+                  101,
+                  117,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "seat_tier"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bid_queue_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  105,
+                  100,
+                  95,
+                  113,
+                  117,
+                  101,
+                  117,
+                  101,
+                  95,
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "seat_tier"
+              }
+            ]
+          }
+        },
+        {
+          "name": "ticket_token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "payment_token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "rent",
+          "address": "SysvarRent111111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "tier_name",
+          "type": "string"
+        },
+        {
+          "name": "face_value",
+          "type": "u64"
+        },
+        {
+          "name": "organizer_resale_policy",
+          "type": {
+            "defined": {
+              "name": "ResalePolicy"
+            }
+          }
+        },
+        {
+          "name": "total_seats",
+          "type": "u32"
+        }
+      ]
+    },
+    {
+      "name": "execute_resale",
+      "discriminator": [
+        186,
+        13,
+        92,
+        24,
+        194,
+        29,
+        239,
+        175
+      ],
+      "accounts": [
+        {
+          "name": "seller",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "buyer"
+        },
+        {
+          "name": "seat_tier"
+        },
+        {
+          "name": "seat",
+          "writable": true
+        },
+        {
+          "name": "bid_queue",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  105,
+                  100,
+                  95,
+                  113,
+                  117,
+                  101,
+                  117,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "seat_tier"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bid_queue_vault",
+          "writable": true
+        },
+        {
+          "name": "ticket_mint"
+        },
+        {
+          "name": "payment_mint"
+        },
+        {
+          "name": "seller_ticket_ata",
+          "writable": true
+        },
+        {
+          "name": "buyer_ticket_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "buyer"
+              },
+              {
+                "kind": "account",
+                "path": "ticket_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "ticket_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "seller_payment_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "seller"
+              },
+              {
+                "kind": "account",
+                "path": "payment_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "ticket_token_program",
+          "address": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        },
+        {
+          "name": "payment_token_program"
+        },
+        {
+          "name": "associated_token_program",
+          "address": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "join_queue",
+      "discriminator": [
+        157,
+        115,
+        48,
+        109,
+        65,
+        86,
+        203,
+        238
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "seat_tier"
+        },
+        {
+          "name": "bid_queue",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  105,
+                  100,
+                  95,
+                  113,
+                  117,
+                  101,
+                  117,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "seat_tier"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bid_queue_vault",
+          "writable": true
+        },
+        {
+          "name": "payment_mint"
+        },
+        {
+          "name": "buyer_payment_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "buyer"
+              },
+              {
+                "kind": "account",
+                "path": "payment_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "payment_token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "leave_queue",
+      "discriminator": [
+        95,
+        75,
+        87,
+        92,
+        172,
+        245,
+        65,
+        97
+      ],
+      "accounts": [
+        {
+          "name": "buyer",
+          "signer": true
+        },
+        {
+          "name": "seat_tier"
+        },
+        {
+          "name": "bid_queue",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  98,
+                  105,
+                  100,
+                  95,
+                  113,
+                  117,
+                  101,
+                  117,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "seat_tier"
+              }
+            ]
+          }
+        },
+        {
+          "name": "bid_queue_vault",
+          "writable": true
+        },
+        {
+          "name": "payment_mint"
+        },
+        {
+          "name": "buyer_payment_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "buyer"
+              },
+              {
+                "kind": "account",
+                "path": "payment_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "payment_token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "refund_ticket",
+      "discriminator": [
+        178,
+        97,
+        75,
+        218,
+        227,
+        28,
+        21,
+        73
+      ],
+      "accounts": [
+        {
+          "name": "organizer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "event"
+        },
+        {
+          "name": "seat_tier"
+        },
+        {
+          "name": "seat",
+          "writable": true
+        },
+        {
+          "name": "payment_mint"
+        },
+        {
+          "name": "customer",
+          "docs": [
+            "validated against seat.owner."
+          ]
+        },
+        {
+          "name": "organizer_payment_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "organizer"
+              },
+              {
+                "kind": "account",
+                "path": "payment_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "customer_payment_ata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "customer"
+              },
+              {
+                "kind": "account",
+                "path": "payment_token_program"
+              },
+              {
+                "kind": "account",
+                "path": "payment_mint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "payment_token_program"
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "BidQueue",
+      "discriminator": [
+        30,
+        229,
+        68,
+        250,
+        79,
+        132,
+        153,
+        91
+      ]
+    },
+    {
+      "name": "Event",
+      "discriminator": [
+        125,
+        192,
+        125,
+        158,
+        9,
+        115,
+        152,
+        233
+      ]
+    },
+    {
+      "name": "JurisdictionRegistry",
+      "discriminator": [
+        73,
+        20,
+        2,
+        238,
+        36,
+        118,
+        222,
+        115
+      ]
+    },
+    {
+      "name": "Seat",
+      "discriminator": [
+        90,
+        228,
+        22,
+        90,
+        162,
+        86,
+        173,
+        26
+      ]
+    },
+    {
+      "name": "SeatTier",
+      "discriminator": [
+        12,
+        0,
+        211,
+        1,
+        187,
+        165,
+        103,
+        203
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidMaxBps",
+      "msg": "max_bps must be between 0 and 10000"
+    },
+    {
+      "code": 6001,
+      "name": "SeatNotAvailable",
+      "msg": "seat is not available for purchase"
+    },
+    {
+      "code": 6002,
+      "name": "SeatCodeTooLong",
+      "msg": "seat code exceeds max length"
+    },
+    {
+      "code": 6003,
+      "name": "DisplayNameTooLong",
+      "msg": "display name exceeds max length"
+    },
+    {
+      "code": 6004,
+      "name": "TierNameTooLong",
+      "msg": "tier name exceeds max length"
+    },
+    {
+      "code": 6005,
+      "name": "JurisdictionCodeTooLong",
+      "msg": "jurisdiction code exceeds max length"
+    },
+    {
+      "code": 6006,
+      "name": "ResalePriceExceedsCap",
+      "msg": "resale price exceeds policy cap"
+    },
+    {
+      "code": 6007,
+      "name": "RefundDeadlinePassed",
+      "msg": "refund deadline has passed"
+    },
+    {
+      "code": 6008,
+      "name": "InvalidSeatStatus",
+      "msg": "ticket already checked in or invalid state for this operation"
+    },
+    {
+      "code": 6009,
+      "name": "Unauthorized",
+      "msg": "caller is not authorized organizer"
+    },
+    {
+      "code": 6010,
+      "name": "QueueFull",
+      "msg": "bid queue is full"
+    },
+    {
+      "code": 6011,
+      "name": "QueueEmpty",
+      "msg": "bid queue is empty, nothing to resell"
+    },
+    {
+      "code": 6012,
+      "name": "BidExceedsCap",
+      "msg": "bid amount exceeds resale policy cap"
+    },
+    {
+      "code": 6013,
+      "name": "NotInQueue",
+      "msg": "caller has no bid in this queue"
+    },
+    {
+      "code": 6014,
+      "name": "QueueFrontMismatch",
+      "msg": "supplied buyer does not match the queue front"
+    }
+  ],
+  "types": [
+    {
+      "name": "Bid",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "buyer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "joined_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "BidQueue",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "seat_tier",
+            "type": "pubkey"
+          },
+          {
+            "name": "vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "bids",
+            "type": {
+              "array": [
+                {
+                  "defined": {
+                    "name": "Bid"
+                  }
+                },
+                20
+              ]
+            }
+          },
+          {
+            "name": "count",
+            "type": "u8"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Event",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "organizer",
+            "type": "pubkey"
+          },
+          {
+            "name": "event_id",
+            "type": "u64"
+          },
+          {
+            "name": "jurisdiction_registry",
+            "type": "pubkey"
+          },
+          {
+            "name": "refund_deadline",
+            "type": "i64"
+          },
+          {
+            "name": "refund_bps",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "JurisdictionRegistry",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "jurisdiction_code",
+            "type": "string"
+          },
+          {
+            "name": "legal_cap_bps",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ResalePolicy",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Capped",
+            "fields": [
+              {
+                "name": "max_bps",
+                "type": "u16"
+              }
+            ]
+          },
+          {
+            "name": "Unrestricted"
+          },
+          {
+            "name": "NonTransferable"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Seat",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "seat_tier",
+            "type": "pubkey"
+          },
+          {
+            "name": "seat_code",
+            "type": "string"
+          },
+          {
+            "name": "display_name",
+            "type": "string"
+          },
+          {
+            "name": "token_account",
+            "type": "pubkey"
+          },
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "status",
+            "type": {
+              "defined": {
+                "name": "SeatStatus"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SeatStatus",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Available"
+          },
+          {
+            "name": "Sold"
+          },
+          {
+            "name": "Refunded"
+          },
+          {
+            "name": "CheckedIn"
+          }
+        ]
+      }
+    },
+    {
+      "name": "SeatTier",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "event",
+            "type": "pubkey"
+          },
+          {
+            "name": "tier_name",
+            "type": "string"
+          },
+          {
+            "name": "ticket_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "payment_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "face_value",
+            "type": "u64"
+          },
+          {
+            "name": "resale_policy",
+            "type": {
+              "defined": {
+                "name": "ResalePolicy"
+              }
+            }
+          },
+          {
+            "name": "total_seats",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    }
+  ]
+}
