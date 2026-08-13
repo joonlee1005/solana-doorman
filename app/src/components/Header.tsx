@@ -3,6 +3,8 @@ import logo from "../assets/logo_doorman_transparent.png";
 import { useIdentity } from "../context/IdentityContext";
 import { formatSol, formatUsdcAmount, shortAddr } from "../lib/format";
 import { identityLabel, type IdentityId } from "../lib/identities";
+import { explorerTxUrl } from "../lib/explorer";
+import { useResaleNotifications } from "../hooks/useResaleNotifications";
 import { T, type Lang } from "../i18n";
 import type { Screen } from "../screens";
 
@@ -35,6 +37,8 @@ export function Header({ lang, onSetLang, screen, onGoHome, onGoAdmin, onGoTicke
       // Clipboard API unavailable/denied — the full address is still visible via the tooltip.
     }
   }
+
+  const { items: notifications, unreadCount, markAllRead } = useResaleNotifications();
 
   const settingsRef = useRef<HTMLDivElement>(null);
   const accountRef = useRef<HTMLDivElement>(null);
@@ -225,24 +229,57 @@ export function Header({ lang, onSetLang, screen, onGoHome, onGoAdmin, onGoTicke
           <span className="hidden sm:inline">{t.navMyTickets}</span>
         </button>
 
-        {/* TODO: back this with a real notification source once one exists; currently always empty */}
         <div className="relative flex items-center" ref={notifRef}>
           <button
-            onClick={() => setNotifOpen((v) => !v)}
-            className="flex items-center text-header-text"
+            onClick={() => {
+              const next = !notifOpen;
+              setNotifOpen(next);
+              if (next) markAllRead();
+            }}
+            className="relative flex items-center text-header-text"
             aria-label={t.notifTitle}
           >
             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
+            {unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold leading-none text-white">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
           {notifOpen && (
             <div className="absolute right-0 top-9 z-20 w-[340px] overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
               <div className="border-b border-border px-4 py-3.5 text-sm font-bold text-text">
                 {t.notifTitle}
               </div>
-              <div className="px-4 py-10 text-center text-sm text-text-faint">{t.notifEmpty}</div>
+              {notifications.length === 0 ? (
+                <div className="px-4 py-10 text-center text-sm text-text-faint">{t.notifEmpty}</div>
+              ) : (
+                <div className="max-h-[360px] overflow-y-auto">
+                  {notifications.map((n) => (
+                    <a
+                      key={n.signature}
+                      href={explorerTxUrl(n.signature)}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="block border-b border-border px-4 py-3 text-[13px] leading-relaxed text-text last:border-b-0 hover:bg-bg"
+                    >
+                      <div>
+                        {lang === "ko"
+                          ? `재판매가 체결되어 ${n.eventTitle} ${n.seatCode} 티켓을 받았습니다`
+                          : `Resale matched — you received the ${n.eventTitle} ${n.seatCode} ticket`}
+                      </div>
+                      {n.blockTime && (
+                        <div className="mt-1 text-[11px] text-text-faint">
+                          {new Date(n.blockTime * 1000).toISOString().slice(0, 16).replace("T", " ")}
+                        </div>
+                      )}
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
