@@ -278,15 +278,15 @@ fn buy_seat_for(
 
 #[test]
 fn test_join_queue_escrows_funds_within_cap() {
-    let face_value = 100_000_000u64; // cap @ 2000 bps = 20_000_000
+    let face_value = 100_000_000u64; // cap @ 2000 bps markup = 120_000_000
     let mut world = setup_world(2000);
     let (_, tier_addrs, _) = setup_seat_tier_and_seat(&mut world, face_value);
 
     let buyer = Keypair::new();
     fund(&mut world.svm, &buyer.pubkey());
-    let buyer_ata = fund_usdc(&mut world, &buyer.pubkey(), 100_000_000);
+    let buyer_ata = fund_usdc(&mut world, &buyer.pubkey(), 200_000_000);
 
-    let bid_amount = 20_000_000u64; // exactly at cap
+    let bid_amount = 120_000_000u64; // exactly at cap (face_value + 20%)
     let ix = ix_join_queue(
         &buyer.pubkey(),
         &tier_addrs.seat_tier,
@@ -302,7 +302,7 @@ fn test_join_queue_escrows_funds_within_cap() {
     let vault = read_token_account(&world.svm, &tier_addrs.bid_queue_vault);
     assert_eq!(vault.amount, bid_amount);
     let buyer_after = read_token_account(&world.svm, &buyer_ata);
-    assert_eq!(buyer_after.amount, 100_000_000 - bid_amount);
+    assert_eq!(buyer_after.amount, 200_000_000 - bid_amount);
 
     let raw = world.svm.get_account(&tier_addrs.bid_queue).unwrap();
     let bid_queue: ticketing_system::BidQueue =
@@ -314,13 +314,13 @@ fn test_join_queue_escrows_funds_within_cap() {
 
 #[test]
 fn test_join_queue_fails_when_bid_exceeds_cap() {
-    let face_value = 100_000_000u64; // cap @ 2000 bps = 20_000_000
+    let face_value = 100_000_000u64; // cap @ 2000 bps markup = 120_000_000
     let mut world = setup_world(2000);
     let (_, tier_addrs, _) = setup_seat_tier_and_seat(&mut world, face_value);
 
     let buyer = Keypair::new();
     fund(&mut world.svm, &buyer.pubkey());
-    let buyer_ata = fund_usdc(&mut world, &buyer.pubkey(), 100_000_000);
+    let buyer_ata = fund_usdc(&mut world, &buyer.pubkey(), 200_000_000);
 
     let ix = ix_join_queue(
         &buyer.pubkey(),
@@ -329,23 +329,90 @@ fn test_join_queue_fails_when_bid_exceeds_cap() {
         &tier_addrs.bid_queue_vault,
         &world.payment_mint.pubkey(),
         &buyer_ata,
-        20_000_001, // one base unit over the cap
+        120_000_001, // one base unit over the cap
     );
     let result = send(&mut world.svm, &world.payer, &[ix], &[&buyer]);
     assert!(result.is_err(), "bid above the resale cap must be rejected");
 }
 
 #[test]
-fn test_join_queue_fails_when_queue_full() {
+fn test_join_queue_fails_when_bid_below_face_value() {
     let face_value = 100_000_000u64;
-    let mut world = setup_world(10_000); // unrestricted-ish cap so any small bid passes
+    let mut world = setup_world(2000);
     let (_, tier_addrs, _) = setup_seat_tier_and_seat(&mut world, face_value);
 
-    // MAX_QUEUE_LEN is 20; fill it up.
-    for _ in 0..20 {
+    let buyer = Keypair::new();
+    fund(&mut world.svm, &buyer.pubkey());
+    let buyer_ata = fund_usdc(&mut world, &buyer.pubkey(), 200_000_000);
+
+    let ix = ix_join_queue(
+        &buyer.pubkey(),
+        &tier_addrs.seat_tier,
+        &tier_addrs.bid_queue,
+        &tier_addrs.bid_queue_vault,
+        &world.payment_mint.pubkey(),
+        &buyer_ata,
+        face_value - 1, // one base unit under face value
+    );
+    let result = send(&mut world.svm, &world.payer, &[ix], &[&buyer]);
+    assert!(result.is_err(), "bid below face value must be rejected");
+}
+
+/// Verifies cap = face_value * (10_000 + max_bps) / 10_000 (a markup over face
+/// value) rather than face_value * max_bps / 10_000 (a fraction of it), using
+/// a different bps than the other tests to pin down the formula itself.
+#[test]
+fn test_join_queue_cap_is_face_value_plus_markup_percentage() {
+    let face_value = 100_000_000u64;
+    // setup_seat_tier_and_seat always requests an organizer policy of Capped
+    // 2000 bps; a 500 bps legal cap here makes more_restrictive() pick the
+    // (stricter) 500 bps, giving cap = 100_000_000 * 10_500 / 10_000 = 105_000_000.
+    let mut world = setup_world(500);
+    let (_, tier_addrs, _) = setup_seat_tier_and_seat(&mut world, face_value);
+
+    let within = Keypair::new();
+    fund(&mut world.svm, &within.pubkey());
+    let within_ata = fund_usdc(&mut world, &within.pubkey(), 200_000_000);
+    let ix = ix_join_queue(
+        &within.pubkey(),
+        &tier_addrs.seat_tier,
+        &tier_addrs.bid_queue,
+        &tier_addrs.bid_queue_vault,
+        &world.payment_mint.pubkey(),
+        &within_ata,
+        105_000_000, // face_value + 5%, exactly at cap
+    );
+    send(&mut world.svm, &world.payer, &[ix], &[&within])
+        .expect("bid exactly at the markup cap must succeed");
+
+    let over = Keypair::new();
+    fund(&mut world.svm, &over.pubkey());
+    let over_ata = fund_usdc(&mut world, &over.pubkey(), 200_000_000);
+    let ix = ix_join_queue(
+        &over.pubkey(),
+        &tier_addrs.seat_tier,
+        &tier_addrs.bid_queue,
+        &tier_addrs.bid_queue_vault,
+        &world.payment_mint.pubkey(),
+        &over_ata,
+        105_000_001, // one base unit over the markup cap
+    );
+    let result = send(&mut world.svm, &world.payer, &[ix], &[&over]);
+    assert!(result.is_err(), "bid one unit over the markup cap must be rejected");
+}
+
+/// Verifies bids are inserted in price-time priority order: higher amount
+/// ranks first, and among equal amounts the earlier registrant stays ahead.
+#[test]
+fn test_join_queue_orders_by_price_then_time_priority() {
+    let face_value = 100_000_000u64; // cap @ 2000 bps markup = 120_000_000
+    let mut world = setup_world(2000);
+    let (_, tier_addrs, _) = setup_seat_tier_and_seat(&mut world, face_value);
+
+    let join = |world: &mut World, amount: u64| -> anchor_lang::prelude::Pubkey {
         let buyer = Keypair::new();
         fund(&mut world.svm, &buyer.pubkey());
-        let buyer_ata = fund_usdc(&mut world, &buyer.pubkey(), 10_000_000);
+        let buyer_ata = fund_usdc(world, &buyer.pubkey(), 200_000_000);
         let ix = ix_join_queue(
             &buyer.pubkey(),
             &tier_addrs.seat_tier,
@@ -353,7 +420,57 @@ fn test_join_queue_fails_when_queue_full() {
             &tier_addrs.bid_queue_vault,
             &world.payment_mint.pubkey(),
             &buyer_ata,
-            1_000_000,
+            amount,
+        );
+        send(&mut world.svm, &world.payer, &[ix], &[&buyer]).expect("join queue");
+        buyer.pubkey()
+    };
+
+    // Join order: A(110) -> B(100) -> C(115) -> D(110, ties A).
+    let buyer_a = join(&mut world, 110_000_000);
+    let buyer_b = join(&mut world, 100_000_000);
+    let buyer_c = join(&mut world, 115_000_000);
+    let buyer_d = join(&mut world, 110_000_000);
+
+    let raw = world.svm.get_account(&tier_addrs.bid_queue).unwrap();
+    let bid_queue: ticketing_system::BidQueue =
+        anchor_lang::AccountDeserialize::try_deserialize(&mut raw.data.as_slice()).unwrap();
+    assert_eq!(bid_queue.count, 4);
+
+    // Expected: C(115) first (highest amount); then A(110) before D(110)
+    // (same amount, A registered earlier); B(100) last.
+    let ordered = [
+        (buyer_c, 115_000_000u64),
+        (buyer_a, 110_000_000u64),
+        (buyer_d, 110_000_000u64),
+        (buyer_b, 100_000_000u64),
+    ];
+    for (i, (expected_buyer, expected_amount)) in ordered.iter().enumerate() {
+        assert_eq!(bid_queue.bids[i].buyer, *expected_buyer, "position {i} buyer");
+        assert_eq!(bid_queue.bids[i].amount, *expected_amount, "position {i} amount");
+    }
+}
+
+#[test]
+fn test_join_queue_fails_when_queue_full() {
+    let face_value = 100_000_000u64; // cap @ 2000 bps markup = 120_000_000
+    let mut world = setup_world(10_000);
+    let (_, tier_addrs, _) = setup_seat_tier_and_seat(&mut world, face_value);
+
+    // MAX_QUEUE_LEN is 20; fill it up, each bidding exactly face_value (the
+    // lower bound) so every join is unambiguously within [face_value, cap].
+    for _ in 0..20 {
+        let buyer = Keypair::new();
+        fund(&mut world.svm, &buyer.pubkey());
+        let buyer_ata = fund_usdc(&mut world, &buyer.pubkey(), 150_000_000);
+        let ix = ix_join_queue(
+            &buyer.pubkey(),
+            &tier_addrs.seat_tier,
+            &tier_addrs.bid_queue,
+            &tier_addrs.bid_queue_vault,
+            &world.payment_mint.pubkey(),
+            &buyer_ata,
+            face_value,
         );
         send(&mut world.svm, &world.payer, &[ix], &[&buyer])
             .expect("join queue slot should succeed while queue has room");
@@ -361,7 +478,7 @@ fn test_join_queue_fails_when_queue_full() {
 
     let one_too_many = Keypair::new();
     fund(&mut world.svm, &one_too_many.pubkey());
-    let ata_extra = fund_usdc(&mut world, &one_too_many.pubkey(), 10_000_000);
+    let ata_extra = fund_usdc(&mut world, &one_too_many.pubkey(), 150_000_000);
     let ix = ix_join_queue(
         &one_too_many.pubkey(),
         &tier_addrs.seat_tier,
@@ -369,7 +486,7 @@ fn test_join_queue_fails_when_queue_full() {
         &tier_addrs.bid_queue_vault,
         &world.payment_mint.pubkey(),
         &ata_extra,
-        1_000_000,
+        face_value,
     );
     let result = send(&mut world.svm, &world.payer, &[ix], &[&one_too_many]);
     assert!(result.is_err(), "joining a full queue must fail");
@@ -377,7 +494,7 @@ fn test_join_queue_fails_when_queue_full() {
 
 #[test]
 fn test_execute_resale_matches_front_of_queue_and_refreezes_both_accounts() {
-    let face_value = 100_000_000u64; // cap @ 2000 bps = 20_000_000
+    let face_value = 100_000_000u64; // cap @ 2000 bps markup = 120_000_000
     let mut world = setup_world(2000);
     let (event_addr, tier_addrs, seat_addr) = setup_seat_tier_and_seat(&mut world, face_value);
 
@@ -385,10 +502,12 @@ fn test_execute_resale_matches_front_of_queue_and_refreezes_both_accounts() {
     let seller_ticket_ata =
         buy_seat_for(&mut world, &event_addr, &tier_addrs, &seat_addr, &seller, face_value);
 
-    // Two buyers join the queue; buyer1 joins first (front of the FIFO).
+    // buyer1 joins first with the lower bid; buyer2 joins second with a
+    // higher bid. Price-time priority means buyer2 outranks buyer1 despite
+    // joining later, so buyer2 sits at the front of the queue.
     let buyer1 = Keypair::new();
     fund(&mut world.svm, &buyer1.pubkey());
-    let buyer1_ata = fund_usdc(&mut world, &buyer1.pubkey(), 100_000_000);
+    let buyer1_ata = fund_usdc(&mut world, &buyer1.pubkey(), 200_000_000);
     let ix = ix_join_queue(
         &buyer1.pubkey(),
         &tier_addrs.seat_tier,
@@ -396,13 +515,13 @@ fn test_execute_resale_matches_front_of_queue_and_refreezes_both_accounts() {
         &tier_addrs.bid_queue_vault,
         &world.payment_mint.pubkey(),
         &buyer1_ata,
-        15_000_000,
+        105_000_000,
     );
     send(&mut world.svm, &world.payer, &[ix], &[&buyer1]).unwrap();
 
     let buyer2 = Keypair::new();
     fund(&mut world.svm, &buyer2.pubkey());
-    let buyer2_ata = fund_usdc(&mut world, &buyer2.pubkey(), 100_000_000);
+    let buyer2_ata = fund_usdc(&mut world, &buyer2.pubkey(), 200_000_000);
     let ix = ix_join_queue(
         &buyer2.pubkey(),
         &tier_addrs.seat_tier,
@@ -410,13 +529,22 @@ fn test_execute_resale_matches_front_of_queue_and_refreezes_both_accounts() {
         &tier_addrs.bid_queue_vault,
         &world.payment_mint.pubkey(),
         &buyer2_ata,
-        20_000_000,
+        115_000_000,
     );
     send(&mut world.svm, &world.payer, &[ix], &[&buyer2]).unwrap();
 
+    let raw = world.svm.get_account(&tier_addrs.bid_queue).unwrap();
+    let bid_queue_before: ticketing_system::BidQueue =
+        anchor_lang::AccountDeserialize::try_deserialize(&mut raw.data.as_slice()).unwrap();
+    assert_eq!(bid_queue_before.count, 2);
+    assert_eq!(bid_queue_before.bids[0].buyer, buyer2.pubkey());
+    assert_eq!(bid_queue_before.bids[0].amount, 115_000_000);
+    assert_eq!(bid_queue_before.bids[1].buyer, buyer1.pubkey());
+    assert_eq!(bid_queue_before.bids[1].amount, 105_000_000);
+
     let (ix, resale_addrs) = ix_execute_resale(
         &seller.pubkey(),
-        &buyer1.pubkey(),
+        &buyer2.pubkey(),
         &tier_addrs.seat_tier,
         &seat_addr,
         &tier_addrs.bid_queue,
@@ -428,33 +556,34 @@ fn test_execute_resale_matches_front_of_queue_and_refreezes_both_accounts() {
     send(&mut world.svm, &world.payer, &[ix], &[&seller])
         .expect("execute resale against queue front");
 
-    // Seller got paid 15_000_000 (buyer1's bid), not buyer2's, on top of the
-    // face_value*3 - face_value leftover from buy_seat_for's own initial purchase.
+    // Seller got paid 115_000_000 (buyer2's higher, front-of-queue bid), not
+    // buyer1's, on top of the face_value*3 - face_value leftover from
+    // buy_seat_for's own initial purchase.
     let seller_payment = read_token_account(&world.svm, &resale_addrs.seller_payment_ata);
-    assert_eq!(seller_payment.amount, (face_value * 3 - face_value) + 15_000_000);
+    assert_eq!(seller_payment.amount, (face_value * 3 - face_value) + 115_000_000);
 
-    // Ticket moved to buyer1 and both accounts are frozen again.
+    // Ticket moved to buyer2 and both accounts are frozen again.
     let seller_ticket = read_token_account(&world.svm, &seller_ticket_ata);
     assert_eq!(seller_ticket.amount, 0);
     assert_eq!(seller_ticket.state, AccountState::Frozen);
-    let buyer1_ticket = read_token_account(&world.svm, &resale_addrs.buyer_ticket_ata);
-    assert_eq!(buyer1_ticket.amount, 1);
-    assert_eq!(buyer1_ticket.state, AccountState::Frozen);
+    let buyer2_ticket = read_token_account(&world.svm, &resale_addrs.buyer_ticket_ata);
+    assert_eq!(buyer2_ticket.amount, 1);
+    assert_eq!(buyer2_ticket.state, AccountState::Frozen);
 
     // Seat ownership transferred.
     let raw = world.svm.get_account(&seat_addr).unwrap();
     let seat: ticketing_system::Seat =
         anchor_lang::AccountDeserialize::try_deserialize(&mut raw.data.as_slice()).unwrap();
-    assert_eq!(seat.owner, buyer1.pubkey());
+    assert_eq!(seat.owner, buyer2.pubkey());
     assert_eq!(seat.token_account, resale_addrs.buyer_ticket_ata);
 
-    // Queue advanced: buyer2 is now the sole entry at the front.
+    // Queue advanced: buyer1 is now the sole entry at the front.
     let raw = world.svm.get_account(&tier_addrs.bid_queue).unwrap();
     let bid_queue: ticketing_system::BidQueue =
         anchor_lang::AccountDeserialize::try_deserialize(&mut raw.data.as_slice()).unwrap();
     assert_eq!(bid_queue.count, 1);
-    assert_eq!(bid_queue.bids[0].buyer, buyer2.pubkey());
-    assert_eq!(bid_queue.bids[0].amount, 20_000_000);
+    assert_eq!(bid_queue.bids[0].buyer, buyer1.pubkey());
+    assert_eq!(bid_queue.bids[0].amount, 105_000_000);
 }
 
 #[test]
@@ -491,7 +620,7 @@ fn test_leave_queue_refunds_and_removes_entry() {
 
     let buyer = Keypair::new();
     fund(&mut world.svm, &buyer.pubkey());
-    let buyer_ata = fund_usdc(&mut world, &buyer.pubkey(), 100_000_000);
+    let buyer_ata = fund_usdc(&mut world, &buyer.pubkey(), 200_000_000);
     let ix = ix_join_queue(
         &buyer.pubkey(),
         &tier_addrs.seat_tier,
@@ -499,7 +628,7 @@ fn test_leave_queue_refunds_and_removes_entry() {
         &tier_addrs.bid_queue_vault,
         &world.payment_mint.pubkey(),
         &buyer_ata,
-        10_000_000,
+        110_000_000,
     );
     send(&mut world.svm, &world.payer, &[ix], &[&buyer]).unwrap();
 
@@ -515,7 +644,7 @@ fn test_leave_queue_refunds_and_removes_entry() {
         .expect("leave queue");
 
     let buyer_after = read_token_account(&world.svm, &buyer_ata);
-    assert_eq!(buyer_after.amount, 100_000_000);
+    assert_eq!(buyer_after.amount, 200_000_000);
 
     let raw = world.svm.get_account(&tier_addrs.bid_queue).unwrap();
     let bid_queue: ticketing_system::BidQueue =

@@ -1,6 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
+import { TOKEN_2022_PROGRAM_ID, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { connection } from "../lib/program";
+import { getStoredPaymentMint } from "../lib/paymentMint";
 import { loadIdentities, type Identity, type IdentityId } from "../lib/identities";
 
 interface IdentityContextValue {
@@ -10,6 +12,9 @@ interface IdentityContextValue {
   setSelectedId: (id: IdentityId) => void;
   balances: Record<IdentityId, number>;
   refreshBalances: () => Promise<void>;
+  /** Payment-mint (test USDC) balance per identity, in display units (e.g. 150, not base units). */
+  usdcBalances: Record<IdentityId, number>;
+  refreshUsdcBalances: () => Promise<void>;
   airdrop: (id: IdentityId) => Promise<void>;
   airdropping: IdentityId | null;
 }
@@ -20,6 +25,9 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
   const [identities] = useState<Identity[]>(() => loadIdentities());
   const [selectedId, setSelectedId] = useState<IdentityId>("organizer");
   const [balances, setBalances] = useState<Record<IdentityId, number>>(
+    {} as Record<IdentityId, number>,
+  );
+  const [usdcBalances, setUsdcBalances] = useState<Record<IdentityId, number>>(
     {} as Record<IdentityId, number>,
   );
   const [airdropping, setAirdropping] = useState<IdentityId | null>(null);
@@ -38,11 +46,41 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     setBalances(Object.fromEntries(entries) as Record<IdentityId, number>);
   }, [identities]);
 
+  const refreshUsdcBalances = useCallback(async () => {
+    const mint = getStoredPaymentMint();
+    if (!mint) {
+      setUsdcBalances({} as Record<IdentityId, number>);
+      return;
+    }
+    const entries = await Promise.all(
+      identities.map(async (identity) => {
+        try {
+          const ata = getAssociatedTokenAddressSync(
+            mint,
+            identity.keypair.publicKey,
+            false,
+            TOKEN_2022_PROGRAM_ID,
+          );
+          const { value } = await connection.getTokenAccountBalance(ata);
+          return [identity.id, value.uiAmount ?? 0] as const;
+        } catch {
+          // No ATA yet (never funded) — treat as a zero balance, not an error.
+          return [identity.id, 0] as const;
+        }
+      }),
+    );
+    setUsdcBalances(Object.fromEntries(entries) as Record<IdentityId, number>);
+  }, [identities]);
+
   useEffect(() => {
     refreshBalances();
-    const interval = setInterval(refreshBalances, 15_000);
+    refreshUsdcBalances();
+    const interval = setInterval(() => {
+      refreshBalances();
+      refreshUsdcBalances();
+    }, 15_000);
     return () => clearInterval(interval);
-  }, [refreshBalances]);
+  }, [refreshBalances, refreshUsdcBalances]);
 
   const airdrop = useCallback(
     async (id: IdentityId) => {
@@ -72,6 +110,8 @@ export function IdentityProvider({ children }: { children: ReactNode }) {
     setSelectedId,
     balances,
     refreshBalances,
+    usdcBalances,
+    refreshUsdcBalances,
     airdrop,
     airdropping,
   };

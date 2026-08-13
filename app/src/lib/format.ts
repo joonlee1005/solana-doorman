@@ -25,6 +25,12 @@ export function formatUsdc(amount: bigint | number): string {
   return `${toDisplayUnits(amount)} USDC`;
 }
 
+/** Same as formatUsdc, but for an amount already in display units (e.g. an
+ * RPC uiAmount), not base units — used for wallet-balance displays. */
+export function formatUsdcAmount(amount: number): string {
+  return `${amount.toLocaleString(undefined, { maximumFractionDigits: 2 })} USDC`;
+}
+
 export function formatSol(lamports: number): string {
   return `${(lamports / 1_000_000_000).toFixed(3)} SOL`;
 }

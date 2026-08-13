@@ -80,11 +80,12 @@ pub(crate) fn handler(ctx: Context<ExecuteResale>) -> Result<()> {
     );
 
     let seat_tier = &ctx.accounts.seat_tier;
+    // cap = face_value + up to max_bps% markup over face_value (see join_queue.rs).
     let cap = match seat_tier.resale_policy {
         ResalePolicy::NonTransferable => None,
         ResalePolicy::Unrestricted => Some(u64::MAX),
         ResalePolicy::Capped { max_bps } => Some(
-            (seat_tier.face_value as u128 * max_bps as u128 / 10_000) as u64,
+            (seat_tier.face_value as u128 * (10_000 + max_bps as u128) / 10_000) as u64,
         ),
     };
     let cap = cap.ok_or(TicketError::ResalePriceExceedsCap)?;

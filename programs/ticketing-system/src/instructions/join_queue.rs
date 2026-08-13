@@ -38,15 +38,18 @@ pub struct JoinQueue<'info> {
 
 pub(crate) fn handler(ctx: Context<JoinQueue>, amount: u64) -> Result<()> {
     let seat_tier = &ctx.accounts.seat_tier;
+    // cap = face_value + up to max_bps% markup over face_value (e.g. max_bps=2000
+    // -> cap = face_value * 1.20), not a fraction of face_value.
     let cap = match seat_tier.resale_policy {
         ResalePolicy::NonTransferable => None,
         ResalePolicy::Unrestricted => Some(u64::MAX),
         ResalePolicy::Capped { max_bps } => Some(
-            (seat_tier.face_value as u128 * max_bps as u128 / 10_000) as u64,
+            (seat_tier.face_value as u128 * (10_000 + max_bps as u128) / 10_000) as u64,
         ),
     };
     let cap = cap.ok_or(TicketError::BidExceedsCap)?;
     require!(amount <= cap, TicketError::BidExceedsCap);
+    require!(amount >= seat_tier.face_value, TicketError::BidBelowFaceValue);
 
     let bid_queue = &mut ctx.accounts.bid_queue;
     require!(
@@ -68,8 +71,17 @@ pub(crate) fn handler(ctx: Context<JoinQueue>, amount: u64) -> Result<()> {
         ctx.accounts.payment_mint.decimals,
     )?;
 
-    let idx = bid_queue.count as usize;
-    bid_queue.bids[idx] = Bid {
+    // Insert in price-time priority order: higher amount ranks first; ties
+    // keep the earlier registrant ahead (the new bid is placed after any
+    // existing bids with amount >= amount).
+    let count = bid_queue.count as usize;
+    let insert_at = (0..count)
+        .find(|&i| bid_queue.bids[i].amount < amount)
+        .unwrap_or(count);
+    for i in (insert_at..count).rev() {
+        bid_queue.bids[i + 1] = bid_queue.bids[i];
+    }
+    bid_queue.bids[insert_at] = Bid {
         buyer: ctx.accounts.buyer.key(),
         amount,
         joined_at: Clock::get()?.unix_timestamp,

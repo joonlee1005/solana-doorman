@@ -1,21 +1,27 @@
 import { Keypair } from "@solana/web3.js";
 import { DEMO_STORAGE_PREFIX } from "./constants";
+import type { Lang } from "../i18n";
 
 export type IdentityId = "organizer" | "customer1" | "customer2" | "customer3";
 
 export interface Identity {
   id: IdentityId;
-  label: string;
+  labelKo: string;
+  labelEn: string;
   role: "organizer" | "customer";
   keypair: Keypair;
 }
 
-const IDENTITY_DEFS: { id: IdentityId; label: string; role: "organizer" | "customer" }[] = [
-  { id: "organizer", label: "주최자 (Organizer)", role: "organizer" },
-  { id: "customer1", label: "고객 1", role: "customer" },
-  { id: "customer2", label: "고객 2", role: "customer" },
-  { id: "customer3", label: "고객 3", role: "customer" },
+const IDENTITY_DEFS: { id: IdentityId; labelKo: string; labelEn: string; role: "organizer" | "customer" }[] = [
+  { id: "organizer", labelKo: "주최자 (Organizer)", labelEn: "Organizer", role: "organizer" },
+  { id: "customer1", labelKo: "고객 1", labelEn: "Customer 1", role: "customer" },
+  { id: "customer2", labelKo: "고객 2", labelEn: "Customer 2", role: "customer" },
+  { id: "customer3", labelKo: "고객 3", labelEn: "Customer 3", role: "customer" },
 ];
+
+export function identityLabel(identity: Identity, lang: Lang): string {
+  return lang === "ko" ? identity.labelKo : identity.labelEn;
+}
 
 function storageKey(id: IdentityId): string {
   return `${DEMO_STORAGE_PREFIX}identity:${id}`;

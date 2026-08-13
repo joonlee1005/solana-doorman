@@ -28,6 +28,8 @@ pub enum TicketError {
     QueueEmpty,
     #[msg("bid amount exceeds resale policy cap")]
     BidExceedsCap,
+    #[msg("bid amount is below the seat tier's face value")]
+    BidBelowFaceValue,
     #[msg("caller has no bid in this queue")]
     NotInQueue,
     #[msg("supplied buyer does not match the queue front")]

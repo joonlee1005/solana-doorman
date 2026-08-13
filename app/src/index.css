@@ -1,26 +1,42 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
 @import "tailwindcss";
 
 @theme {
-  --color-brand-teal: #22c8ba;
-  --color-brand-teal-dark: #189085;
+  /* Doorman v2 design (ported from Claude Design export, 2026-08) */
+  --color-brand-teal: #1ec9b7;
+  --color-brand-teal-dark: #14a795;
   --color-brand-teal-light: #6ee0d5;
 
-  --color-bg: #14171a;
-  --color-surface: #1c2026;
-  --color-surface-hover: #242931;
-  --color-border: #2a2f37;
+  --color-bg: #f5f5f3;
+  --color-surface: #ffffff;
+  --color-surface-hover: #fafaf8;
+  --color-border: #e5e3df;
 
-  --color-text: #f5f7fa;
-  --color-text-muted: #9aa3ae;
+  --color-text: #14191d;
+  --color-text-muted: #6b7280;
+  --color-text-faint: #9ca3af;
 
-  --color-status-available: #22c8ba;
-  --color-status-sold: #6b7280;
-  --color-status-refunded: #f59e0b;
-  --color-status-checkedin: #a78bfa;
+  /* dark header bar sits on top of the light page */
+  --color-header-bg: #14191d;
+  --color-header-border: #2b3437;
+  --color-header-surface: #1e2428;
+  --color-header-surface-2: #2b3437;
+  --color-header-text: #fdfdfd;
+  --color-header-text-muted: #8b959a;
 
-  --color-danger: #ef4444;
+  /* seat-grade accent colors */
+  --color-grade-vip: #1ec9b7;
+  --color-grade-r: #3b82f6;
+  --color-grade-s: #8f98a0;
+
+  --color-status-available: #9ca3af;
+  --color-status-sold: #1ec9b7;
+  --color-status-refunded: #9ca3af;
+  --color-status-checkedin: #8f98a0;
+
+  --color-danger: #e5484d;
   --color-danger-dark: #7f1d1d;
-  --color-success: #22c8ba;
+  --color-success: #16a34a;
 }
 
 html,
@@ -33,7 +49,7 @@ body {
   margin: 0;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
 }
 
 ::selection {
@@ -63,4 +79,19 @@ body {
 
 .animate-shake {
   animation: shake 0.5s ease-in-out;
+}
+
+@keyframes doorman-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-doorman-fade {
+  animation: doorman-fade 0.4s ease-out;
 }

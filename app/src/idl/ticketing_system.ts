@@ -1392,11 +1392,16 @@ export type TicketingSystem = {
     },
     {
       "code": 6013,
+      "name": "bidBelowFaceValue",
+      "msg": "bid amount is below the seat tier's face value"
+    },
+    {
+      "code": 6014,
       "name": "notInQueue",
       "msg": "caller has no bid in this queue"
     },
     {
-      "code": 6014,
+      "code": 6015,
       "name": "queueFrontMismatch",
       "msg": "supplied buyer does not match the queue front"
     }
