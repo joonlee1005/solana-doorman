@@ -1,7 +1,9 @@
 # DOORMAN
 
-**On-chain anti-scalping ticketing protocol on Solana.**
 
+<img width="2816" height="1536" alt="logo_doorman_transparent" src="https://github.com/user-attachments/assets/8063d089-917f-49a2-a209-a717751a29b1" />
+
+**On-chain anti-scalping ticketing protocol on Solana.**
 Anti-scalping laws exist in many jurisdictions, but they lack enforcement mechanisms — resale price caps are written into law, yet nothing stops a seller from listing a ticket above that cap on a resale marketplace. DOORMAN makes that violation *structurally impossible* rather than merely illegal, by enforcing the resale price cap at the protocol level using Solana's Token-2022 Freeze/Thaw mechanism.
 
 Built for [Solana Summer School](https://luma.com/g8b5fy9s) (Solana Foundation) Cohort 1, Demo Day — August 17, 2026.
